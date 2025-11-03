@@ -133,7 +133,7 @@ Speed is not just technical—it's a core part of the user experience:
 ### Core Contributors
 
 - **Tobias Lin** - https://github.com/TobiasLin6
-- **Shreyas ** - https://github.com/Shreyas582
+- **Shreyas Sankpal** - https://github.com/Shreyas582
 - **Maddhav Suneja** - https://github.com/maddii28
 - **Junior Francisco Garcia** - https://github.com/jgarcia1599
 - **Kelly D'oleo** - https://github.com/kellydoleo
