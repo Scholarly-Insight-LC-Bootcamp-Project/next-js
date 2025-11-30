@@ -60,11 +60,16 @@
 ### Reading and Annotating Articles
 
 1. Search for your articles of interest
-2. [Continue explaining how to annotate]
+2. Click on an article.
+3. Begin reading.
+4. Highlight text in the article and write a comment on the right to save.
+5. Read others' annotations and collaborate!
 
 ### Managing Bookmarks
 
-1. [Explain bookmark functionality]
+1. Click the bookmark icon at the top right of the article.
+2. View your bookmarks next to your name in the nav bar.
+3. Enjoy your saves!
 
 ### Opting-in for notifications
 
@@ -146,7 +151,7 @@ Speed is not just technical—it's a core part of the user experience:
 
 ## 📞 Contact & Support
 
-- **Website**: [URL]
+- **Website**: https://lc-scholarly-insight.vercel.app/
 - **Email**: tl4166@nyu.edu
 ---
 
