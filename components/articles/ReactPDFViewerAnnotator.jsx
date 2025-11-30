@@ -5,11 +5,12 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { saveAnnotation, getAnnotations, deleteAnnotation } from '@/lib/firestore'
 import { Viewer, Worker } from '@react-pdf-viewer/core'
 import { highlightPlugin } from '@react-pdf-viewer/highlight'
+import Link from 'next/link'
 import '@react-pdf-viewer/core/lib/styles/index.css'
 import '@react-pdf-viewer/highlight/lib/styles/index.css'
 
 const ReactPDFViewerAnnotator = ({ articleId }) => {
-  const { user, signInAsGuest } = useAuth()
+  const { user } = useAuth()
   const [annotations, setAnnotations] = useState([])
   const [selectedText, setSelectedText] = useState('')
   const [comment, setComment] = useState('')
@@ -22,7 +23,7 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
   const highlightColors = {
     yellow: { bg: 'rgba(255, 255, 0, 0.4)', border: 'border-yellow-500', name: 'Yellow' },
     green: { bg: 'rgba(74, 222, 128, 0.4)', border: 'border-green-500', name: 'Green' },
-    blue: { bg: 'rgba(96, 165, 250, 0.4)', border: 'border-blue-500', name: 'Blue' },
+    blue: { bg: 'rgba(96, 165, 250, 0.4)', border: 'border-blue-400', name: 'Blue' },
     pink: { bg: 'rgba(244, 114, 182, 0.4)', border: 'border-pink-500', name: 'Pink' },
   }
   
@@ -42,9 +43,11 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
     return userColors[hash % userColors.length]
   }
   
-  const getUserName = (userId) => {
+  const getUserName = (annotation) => {
+    if (annotation.userId === user?.uid) return 'You'
+    if (annotation.userName) return annotation.userName
+    const userId = annotation.userId
     if (!userId) return 'Anonymous'
-    if (userId === user?.uid) return 'You'
     return `User ${userId.slice(0, 6)}`
   }
 
@@ -106,14 +109,8 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
   const { jumpToHighlightArea } = highlightPluginInstance
 
   useEffect(() => {
-    if (!user) {
-      signInAsGuest()
-    }
-  }, [user, signInAsGuest])
-
-  useEffect(() => {
-    if (articleId && user) fetchAnnotationsData()
-  }, [articleId, user])
+    if (articleId) fetchAnnotationsData()
+  }, [articleId])
 
   const fetchAnnotationsData = async () => {
     try {
@@ -176,6 +173,7 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
       const annotationData = {
         articleId,
         userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
         pageNumber: currentSelection?.pageNumber || 1,
         highlightedText: selectedText,
         comment,
@@ -253,17 +251,35 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
             </div>
 
             {!showCommentBox && (
-              <button
-                onClick={() => setShowCommentBox(true)}
-                className="w-full mb-4 px-4 py-2.5 bg-blue-600 text-white border border-blue-500 rounded-lg font-medium hover:bg-blue-700 hover:border-blue-600 transition"
-              >
-                Add Comment
-              </button>
+              user ? (
+                <button
+                  onClick={() => setShowCommentBox(true)}
+                  className="w-full mb-4 px-4 py-2.5 bg-blue-600 text-white border border-blue-500 rounded-lg font-medium hover:bg-blue-700 hover:border-blue-600 transition"
+                >
+                  Add Comment
+                </button>
+              ) : (
+                <div className="mb-4 p-4 bg-gray-800 border border-gray-700 rounded-lg text-center">
+                  <p className="text-sm text-gray-400 mb-3">Log in to add annotations</p>
+                  <Link 
+                    href="/login" 
+                    className="inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                  >
+                    Log In
+                  </Link>
+                </div>
+              )
             )}
 
             {showCommentBox && (
               <div id="comment-form" className="mb-4 p-4 bg-gray-800 border border-gray-700 rounded-lg">
                 <h4 className="font-semibold mb-3 text-gray-200">New Annotation</h4>
+                
+                {!user && (
+                  <div className="mb-3 p-2 bg-yellow-900/30 border border-yellow-800 rounded text-xs text-yellow-200">
+                    You must be logged in to save annotations.
+                  </div>
+                )}
                 
                 <label className="block text-xs font-medium mb-1.5 text-gray-400 uppercase tracking-wide">
                   Highlighter Color
@@ -313,7 +329,12 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
                 <div className="flex gap-2">
                   <button 
                     onClick={handleSaveAnnotation} 
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition"
+                    disabled={!user}
+                    className={`flex-1 px-4 py-2 rounded font-medium transition ${
+                      user 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
                     Save
                   </button>
@@ -347,14 +368,14 @@ const ReactPDFViewerAnnotator = ({ articleId }) => {
                 <div className="space-y-3">
                   {annotations.map((a, i) => {
                     const userColor = getUserColor(a.userId || 'anonymous')
-                    const userName = getUserName(a.userId)
+                    const userName = getUserName(a)
                     const highlightBorderColor = highlightColors[a.highlightColor || 'yellow']?.border || 'border-yellow-500'
                     
                     return (
                       <div 
                         key={i} 
                         id={`comment-${i}`}
-                        className={`p-3 bg-gray-850 border-l-4 ${highlightBorderColor} border-t border-r border-b border-gray-800 rounded-lg transition-all`}
+                        className={`p-3 bg-gray-850 border ${highlightBorderColor} rounded-lg transition-all`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <span className={`text-sm font-semibold ${userColor}`}>{userName}</span>

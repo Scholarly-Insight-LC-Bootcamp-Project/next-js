@@ -6,6 +6,7 @@ import ArticleLink from '@/components/articles/ArticleLink'
 import CitationGenerator from '@/components/articles/CitationGenerator'
 import PDFAnnotatorWrapper from '@/components/articles/PDFAnnotatorWrapper'
 import ArticleRecommendations from '@/components/articles/ArticleRecommendations'
+import BookmarkButton from '@/components/articles/BookmarkButton'
 
 const Articles = async ({params}) => {
   const { article_id } = await params
@@ -59,7 +60,8 @@ const Articles = async ({params}) => {
   
   return (
     <div className="min-h-screen bg-gray-950">
-      <div className="container mx-auto p-6 max-w-7xl">
+      <div className="container mx-auto p-6 max-w-7xl relative">
+        <BookmarkButton articleId={article_id} title={title} />
         <ArticleHeader 
           title={title || 'Article Not Found'} 
           authors={authors} 
